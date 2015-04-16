@@ -1,0 +1,40 @@
+---
+desktopNodeList:
+  - { name : 'DesktopNodes', interface : 'eth0' }
+clustername: "gc"
+projectname: "gc"
+domain: massive.org.au
+nfs_server: "{{ groups['ManagementNodes'][0] }}"
+slurm_version: 14.11.1
+munge_version: 0.5.11
+openmpi_version: 1.8.3
+munge_dir: "/opt/munge-{{ munge_version }}"
+slurm_dir: "/opt/slurm-{{ slurm_version }}"
+slurmctrl: "{{ groups['ManagementNodes'][0] }}"
+slurmlogin: "{{ groups['LoginNodes'][0] }}"
+#slurm_use_vpn: false
+slurmqueues:
+  - {name: batch, group: default_partition, default: yes}
+slurmctlddebug: {level: 9, log: 'slurmctld.log'}
+slurmddebug: {level: 9, log: 'slurmd.log'}
+slurmschedlog: {level: 9, log: 'slurmsched.log'}
+slurmdbdlog: {level: 9, log: 'slurmdbd.log'}
+slurmlogdir: "{{ slurm_dir }}/var/log"
+slurmfairshare: {def: false, val: 10000}
+slurmstatedir: "{{ slurm_dir }}/var/state/"
+slurmpiddir: "{{ slurm_dir }}/var/run/"
+slurmdatadir: "{{ slurm_dir }}/var/spool/"
+slurmaccount_create_user: "/usr/local/sbin/slurmuseraccount.sh"
+slurm_provision: "/cinderVolume/local/sbin/slurm_provision.sh"
+#slurmselecttype: "select/linear"
+#slurmfastschedule: "1"
+#slurmschedulertype: "sched/backfill"
+nfs_ipv4: "{{ hostvars[groups['ManagementNodes'][0]]['ansible_eth0']['ipv4']['address'] }}"
+exportList:
+  - { src: '/cinderVolume/home', srvopts: 'fsid=1,rw,no_root_squash,sync', 'opts': 'defaults,nofail', group: [ 'DesktopNodes', 'LoginNodes'], interface: 'eth0' }
+  - { src: '/cinderVolume/scratch', srvopts: 'fsid=2,rw,root_squash,sync', 'opts': 'defaults,nofail', group: [ 'DesktopNodes', 'LoginNodes' ], interface: 'eth0' }
+  - { src: '/cinderVolume/local', srvopts: 'fsid=3,rw,root_squash,sync', 'opts': 'defaults,ro,nofail', group: [ 'DesktopNodes', 'LoginNodes'], interface: 'eth0' }
+nfsMounts:
+    - { name: '/home', ipv4: "{{ hostvars[groups['ManagementNodes'][0]]['ansible_eth0']['ipv4']['address'] }}", src: "/cinderVolume/home", 'opts': 'defaults,nofail', 'fstype':'nfs4' }
+restartServerList:
+  - slurm
