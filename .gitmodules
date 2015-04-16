@@ -1,0 +1,6 @@
+[submodule "ansible_cluster_in_a_box"]
+	path = ansible_cluster_in_a_box
+	url = git@github.com:monash-merc/ansible_cluster_in_a_box.git
+[submodule "heat_ansible_build"]
+	path = heat_ansible_build
+	url = git@github.com:monash-merc/heat_ansible_build.git

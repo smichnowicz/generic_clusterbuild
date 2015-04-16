@@ -1,0 +1,62 @@
+--- 
+heat_template_version: 2013-05-23
+description: "A simple template to boot a cluster (LoginNode, ManagementNodes and Desktop Nodes)"
+parameters:
+  ubuntu_1404_image_id:
+    type: string
+    label: Image ID
+    description: Ubuntu Image
+    default: d57696ba-5ed2-43fe-bf78-a587829973a9
+  ssh_key:
+    type: string
+    default: gc_key
+  avz:
+    type: string
+    default: monash-01
+  
+
+resources:
+  ManagementNode:
+   type: "OS::Nova::Server"
+   properties:
+    name: mgmt0
+    availability_zone: { get_param: avz }
+    flavor: m1.small
+    image: { get_param: ubuntu_1404_image_id }
+    key_name: { get_param: ssh_key }
+    security_groups: [ default, slurm, nfs ]
+    metadata:
+     ansible_host_groups: [ ManagementNodes ]
+     ansible_ssh_user: ec2-user
+  LoginNodes:
+   type: "OS::Heat::ResourceGroup"
+   properties:
+    count: 1
+    resource_def:
+     type: "OS::Nova::Server"
+     properties:
+      availability_zone: { get_param: avz } 
+      flavor: m1.small
+      image: { get_param: ubuntu_1404_image_id }
+      key_name: { get_param: ssh_key }
+      name: login%index%
+      security_groups: [default, slurm ]
+      metadata:
+       ansible_host_groups: [ LoginNodes ]
+       ansible_ssh_user: ec2-user
+  DesktopNodes:
+   type: "OS::Heat::ResourceGroup"
+   properties:
+    count: 1
+    resource_def:
+     type: "OS::Nova::Server"
+     properties:
+      availability_zone: { get_param: avz }
+      flavor: m1.small
+      image: { get_param: ubuntu_1404_image_id }
+      key_name: { get_param: ssh_key }
+      name: node%index%
+      security_groups: [ default, slurm ]
+      metadata:
+       ansible_host_groups: [ DesktopNodes, default_partition ]
+       ansible_ssh_user: ec2-user
