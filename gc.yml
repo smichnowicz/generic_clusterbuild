@@ -32,6 +32,23 @@
   roles:
   - { role: slurm-start }
 
+- hosts: 'ManagementNodes'
+  roles:
+  - { role: link_usr_local, src: /cinderVolume/local, dest: /usr/local }
+  - { role: lmod }
+
+- hosts: '*'
+  roles:
+  - { role: enable_lmod }
+
 - hosts: LoginNodes
   roles:
   - { role: strudel_config }
+
+- hosts: '*'
+  roles:
+  - { role: vncserver }
+  - { role: jasons_ssh_ca }
+  - { role: sshtunnel_user }
+  - { role: MonashBioinformaticsPlatform_node_allocation }
+
